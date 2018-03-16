@@ -30,6 +30,11 @@ RCT_REMAP_METHOD(playVideo,
             rejecter = reject;
 
             UIViewController *root = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+            RCTRootView *rootView = (RCTRootView*) root.view;
+            NSMutableDictionary *props = [rootView.appProperties mutableCopy];
+
+            [props setValue:@YES forKey:@"allowRotation"];
+            rootView.appProperties = props;
             [root presentMoviePlayerViewControllerAnimated:videoPlayerViewController];
         });
     #endif
@@ -41,6 +46,22 @@ RCT_REMAP_METHOD(playVideo,
         [[NSNotificationCenter defaultCenter] removeObserver:self
                                                         name:MPMoviePlayerPlaybackDidFinishNotification
                                                       object:notification.object];
+
+        UIViewController *root = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+        RCTRootView *rootView = (RCTRootView*) root.view;
+        NSMutableDictionary *props = [rootView.appProperties mutableCopy];
+
+        if ([props valueForKey:@"allowRotation"]) {
+            [props setValue:@NO forKey:@"allowRotation"];
+            rootView.appProperties = props;
+        }
+
+        if ([props valueForKey:@"lockOrientation"]) {
+            NSInteger lockOrientation = [[props valueForKey:@"lockOrientation"] integerValue];
+            [[NSOperationQueue mainQueue] addOperationWithBlock:^ {
+                [[UIDevice currentDevice] setValue:[NSNumber numberWithInteger: lockOrientation] forKey:@"orientation"];
+            }];
+        }
 
         MPMovieFinishReason finishReason = [notification.userInfo[MPMoviePlayerPlaybackDidFinishReasonUserInfoKey] integerValue];
 
