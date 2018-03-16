@@ -92,6 +92,33 @@ A static method that returns a Promise to launch a standalone YouTube player wit
 
 * `videoId` (string): The YouTube Video ID to play. **Required**.
 
+### Allow Rotate on iOS
+To enable landscape player on iOS, add the following properties:
+
+```
+// File: AppDelegate.m
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  NSDictionary *props = @{@"allowRotation" : @NO, @"lockOrientation": @(orientation)};
+
+  RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
+                                                      moduleName:@"RCTYouTubeExample"
+                                               initialProperties:nil
+                                                   launchOptions:launchOptions];
+}
+
+-(UIInterfaceOrientationMask)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window
+{
+  RCTRootView *rootView = (RCTRootView*) self.window.rootViewController.view;
+  BOOL allowRotation = [[rootView.appProperties valueForKey:@"allowRotation"] boolValue];
+  if (allowRotation) {
+      return UIInterfaceOrientationMaskAllButUpsideDown;
+  }
+  return UIInterfaceOrientationMaskPortrait;
+}
+```
+
 ### Standalone Player (Android)
 #### Importing
 ```javascript
